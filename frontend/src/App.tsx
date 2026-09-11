@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { CommandPalette } from "@/components/shared/CommandPalette";
@@ -37,22 +38,53 @@ function RouteFallback() {
   );
 }
 
+const THEME_COLOR = { dark: "#0a0e1a", light: "#fcfaf7" } as const;
+
 function ThemeApplier() {
-  const { theme, lang } = useAppStore();
+  // Selectors rather than a whole-store destructure: this component sits
+  // above the router and re-rendering it on every toast is pure waste.
+  const theme = useAppStore((s) => s.theme);
+  const lang  = useAppStore((s) => s.lang);
+
   useEffect(() => {
     document.documentElement.classList.remove("dark", "light");
     document.documentElement.classList.add(theme);
+    // Mirror for the pre-paint script in index.html (which prefers the
+    // zustand blob and only falls back to this key).
     localStorage.setItem("trova-theme", theme);
+    // Repaint the mobile browser chrome to match. The two static
+    // <meta theme-color media="..."> tags in index.html follow the OS
+    // scheme, which is NOT what the app follows — someone using the app
+    // in light mode on a phone set to dark got a black status bar over a
+    // cream page. This overrides both with the app's actual theme.
+    document
+      .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+      .forEach((m) => {
+        m.removeAttribute("media");
+        m.content = THEME_COLOR[theme];
+      });
   }, [theme]);
+
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
+
   return null;
 }
 
 export default function App() {
   const markTourSeen = useAppStore((s) => s.markTourSeen);
   return (
+    // index.css collapses CSS animations under prefers-reduced-motion, but
+    // that rule cannot touch framer-motion: framer drives transforms from
+    // JS as inline styles, so `transition-duration: 0.01ms !important`
+    // never applies to it. Every page transition, modal entrance, toast
+    // spring and layout-shared indicator in the app is framer-driven —
+    // i.e. the whole of the app's actual motion was ignoring the setting.
+    // `reducedMotion="user"` makes framer read the same media query and
+    // drop transform/layout animation while keeping opacity cross-fades,
+    // which is exactly the trade-off the CSS block already documents.
+    <MotionConfig reducedMotion="user">
     <TourProvider onComplete={markTourSeen}>
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ThemeApplier />
@@ -99,5 +131,6 @@ export default function App() {
       </Suspense>
     </BrowserRouter>
     </TourProvider>
+    </MotionConfig>
   );
 }

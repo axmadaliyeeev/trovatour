@@ -16,7 +16,10 @@ import type { Location } from "@/types";
 export default function SavedPlaces() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { plan, removeFromPlan, user, openAuthModal } = useAppStore();
+  const plan           = useAppStore((s) => s.plan);
+  const removeFromPlan = useAppStore((s) => s.removeFromPlan);
+  const user           = useAppStore((s) => s.user);
+  const openAuthModal  = useAppStore((s) => s.openAuthModal);
 
   const byCity = useMemo(() => {
     const groups = new Map<string, Location[]>();

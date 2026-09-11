@@ -9,7 +9,11 @@ import { LoginTab, RegisterTab } from "./AuthForms";
 
 // ── Main modal ────────────────────────────────────────────────────────────────
 export function AuthModal() {
-  const { authModalOpen, authModalTab, closeAuthModal } = useAppStore();
+  // Also mounted app-wide and closed almost all the time — same reason as
+  // the command palette for selecting fields instead of the whole store.
+  const authModalOpen  = useAppStore((s) => s.authModalOpen);
+  const authModalTab   = useAppStore((s) => s.authModalTab);
+  const closeAuthModal = useAppStore((s) => s.closeAuthModal);
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const tabResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

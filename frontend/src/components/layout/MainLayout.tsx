@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/Toaster";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { TourRunner } from "./TourRunner";
 
@@ -81,9 +82,29 @@ function ScrollToTop() {
   );
 }
 
+// Keyboard and screen-reader users otherwise have to tab through the entire
+// sidebar (5 nav items + AI + profile card) or the header controls before
+// reaching page content, on every single route change. The link is visually
+// hidden until it takes focus, at which point it becomes a normal, visible
+// control — the standard pattern, and the first thing an accessibility
+// audit looks for.
+function SkipLink({ label }: { label: string }) {
+  return (
+    <a
+      href="#main-content"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[300]
+                 focus:px-4 focus:py-2 focus:rounded-xl focus:bg-indigo-500 focus:text-white
+                 focus:text-sm focus:font-semibold focus:shadow-lg"
+    >
+      {label}
+    </a>
+  );
+}
+
 export function MainLayout() {
   const { isDesktop } = useBreakpoint();
   const { checkAuth } = useAuth();
+  const { t } = useTranslation();
   const checked = useRef(false);
 
   useEffect(() => {
@@ -99,10 +120,11 @@ export function MainLayout() {
       // never gets a real height to overflow within, so it silently never
       // scrolls (content just gets clipped by the ancestor's overflow-hidden).
       <div className="flex h-screen app-bg overflow-hidden">
+        <SkipLink label={t("nav", "skip_to_content")} />
         <Sidebar />
         <div className="ml-60 flex-1 flex flex-col h-full overflow-hidden">
           <TopHeader />
-          <main className="scroll-main flex-1 overflow-y-auto">
+          <main id="main-content" tabIndex={-1} className="scroll-main flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-6xl">
               <PageTransition>
                 <Outlet />
@@ -119,8 +141,11 @@ export function MainLayout() {
 
   return (
     <div className="flex flex-col h-dvh app-bg overflow-hidden">
+      <SkipLink label={t("nav", "skip_to_content")} />
       <TopHeader />
       <main
+        id="main-content"
+        tabIndex={-1}
         className="scroll-main flex-1 overflow-y-auto"
         style={{ paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))" }}
       >

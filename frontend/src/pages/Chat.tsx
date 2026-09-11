@@ -61,7 +61,7 @@ const MentionedLocations = memo(function MentionedLocations({
             </span>
           </span>
           <span className="flex items-center gap-0.5 text-[10px] font-bold text-indigo-400 shrink-0">
-            <StarIcon className="w-3 h-3 fill-indigo-400" />{loc.rating}
+            <StarIcon className="w-3 h-3 fill-gold-400" />{loc.rating}
           </span>
         </button>
       ))}
@@ -114,7 +114,9 @@ function extractChatError(err: unknown, fallback: string, wakingUp: string): str
 }
 
 export default function Chat() {
-  const { plan, user, showToast } = useAppStore();
+  const plan      = useAppStore((s) => s.plan);
+  const user      = useAppStore((s) => s.user);
+  const showToast = useAppStore((s) => s.showToast);
   const { t, lang } = useTranslation();
   const navigate = useNavigate();
   const { isDesktop } = useBreakpoint();
@@ -563,7 +565,15 @@ export default function Chat() {
                 <button
                   key={action.label}
                   onClick={() => sendMessage(action.text)}
-                  className="animate-fade-up group flex items-center gap-3 p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-left text-xs font-semibold text-[var(--foreground)] hover:border-indigo-500/40 hover:bg-[var(--card-hover)] transition-colors duration-150 active:scale-[0.98]"
+                  className={cn(
+                    "animate-fade-up group flex items-center gap-3 p-3 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-left text-xs font-semibold text-[var(--foreground)] hover:border-indigo-500/40 hover:bg-[var(--card-hover)] transition-colors duration-150 active:scale-[0.98]",
+                    // Five cards in a two-column grid left the last one as
+                    // an orphan with a hole beside it — the block read as
+                    // an unfinished layout rather than a composed set.
+                    // Letting the odd card span the full width turns the
+                    // remainder into a deliberate 2 + 2 + 1 arrangement.
+                    i === QUICK_ACTIONS.length - 1 && QUICK_ACTIONS.length % 2 === 1 && "xs:col-span-2"
+                  )}
                   style={{ animationDelay: `${250 + i * 60}ms` }}
                 >
                   <span className={cn("flex items-center justify-center w-9 h-9 rounded-xl shrink-0", action.bg)}>

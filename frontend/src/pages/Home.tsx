@@ -204,7 +204,7 @@ export default function Home() {
               </span>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map(i => (
-                  <Star key={i} className="w-3 h-3 text-indigo-500 fill-indigo-500" />
+                  <Star key={i} className="w-3 h-3 text-gold-500 fill-gold-500" />
                 ))}
                 <span className="text-xs font-semibold text-[var(--foreground)] ml-0.5">4.8</span>
               </div>

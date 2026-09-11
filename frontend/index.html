@@ -2,21 +2,98 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>trova — O'zbekiston AI Sayohat Yordamchisi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <title>trova — AI travel guide to Uzbekistan</title>
+    <meta
+      name="description"
+      content="Plan a trip through Uzbekistan with Trova AI: curated places in Samarkand, Bukhara, Khiva and Tashkent, real prices, AI-built itineraries and honest reviews — in six languages."
+    />
+    <link rel="canonical" href="https://trovatour.vercel.app/" />
+
+    <!-- Paints the browser/OS chrome to match the app canvas instead of
+         leaving a white strip above a dark page on mobile. Two entries,
+         one per scheme, because the value is a static colour — the
+         inline script below keeps it in sync with the app's own toggle,
+         which is independent of the OS setting. -->
+    <meta name="theme-color" content="#fcfaf7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0e1a" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="dark light" />
+
+    <!-- Social previews. Without these, every link shared to Telegram,
+         WhatsApp, Slack, X or iMessage unfurled as a bare URL with no
+         title, copy or image — for a consumer travel product that is the
+         single cheapest acquisition surface there is. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="trova" />
+    <meta property="og:url" content="https://trovatour.vercel.app/" />
+    <meta property="og:title" content="trova — AI travel guide to Uzbekistan" />
+    <meta
+      property="og:description"
+      content="AI-built itineraries, curated places and real prices across Samarkand, Bukhara, Khiva and Tashkent."
+    />
+    <meta property="og:image" content="https://trovatour.vercel.app/img/logo-s-trova.png" />
+    <meta property="og:image:alt" content="trova" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="uz_UZ" />
+    <meta property="og:locale:alternate" content="ru_RU" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="trova — AI travel guide to Uzbekistan" />
+    <meta
+      name="twitter:description"
+      content="AI-built itineraries, curated places and real prices across Samarkand, Bukhara, Khiva and Tashkent."
+    />
+    <meta name="twitter:image" content="https://trovatour.vercel.app/img/logo-s-trova.png" />
+
     <link rel="icon" type="image/svg+xml" href="/img/icon-logo.svg" />
-    <link rel="apple-touch-icon" href="/img/icon-logo.svg" />
+    <link rel="apple-touch-icon" href="/img/logo-s-trova.png" />
+    <meta name="apple-mobile-web-app-title" content="trova" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <script>
-      // Apply theme before React renders (no flash)
-      try {
-        var t = localStorage.getItem("trova-theme") || "dark";
-        document.documentElement.classList.add(t);
-      } catch(e) {
-        document.documentElement.classList.add("dark");
-      }
+      // Applies the saved theme before first paint, so the page never
+      // flashes the wrong canvas.
+      //
+      // The source of truth is zustand's persisted blob ("trova-v1"); the
+      // standalone "trova-theme" key is only a mirror App.tsx writes for
+      // this script's benefit. Reading the mirror ALONE was the bug: if it
+      // was ever cleared on its own (a partial storage wipe, an older
+      // build, a browser pruning keys) this script defaulted to dark while
+      // the store rehydrated to the user's real choice of light — a full
+      // dark-to-light repaint one frame after load. Prefer the store, fall
+      // back to the mirror, then to dark.
+      (function () {
+        var theme = "dark";
+        try {
+          var persisted = localStorage.getItem("trova-v1");
+          if (persisted) {
+            var t = JSON.parse(persisted);
+            if (t && t.state && (t.state.theme === "light" || t.state.theme === "dark")) {
+              theme = t.state.theme;
+            }
+          } else {
+            var mirror = localStorage.getItem("trova-theme");
+            if (mirror === "light" || mirror === "dark") theme = mirror;
+          }
+        } catch (e) {
+          /* private mode / storage disabled — fall through to dark */
+        }
+        var root = document.documentElement;
+        root.classList.remove("dark", "light");
+        root.classList.add(theme);
+        // Keep the OS chrome matching the app's own toggle, not just the
+        // OS scheme the two <meta theme-color> entries above cover.
+        var m = document.createElement("meta");
+        m.name = "theme-color";
+        m.content = theme === "dark" ? "#0a0e1a" : "#fcfaf7";
+        document.head.appendChild(m);
+      })();
     </script>
   </head>
   <body>

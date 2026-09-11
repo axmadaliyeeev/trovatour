@@ -56,7 +56,7 @@ export function Stars({
                 style={{ width: `${fillPct}%` }}
               >
                 <Star
-                  className="text-indigo-500 fill-indigo-500"
+                  className="text-gold-500 fill-gold-500"
                   style={{ width: px, height: px }}
                 />
               </span>

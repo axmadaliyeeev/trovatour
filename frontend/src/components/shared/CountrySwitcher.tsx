@@ -31,7 +31,7 @@ function CountryFlagChip({ code }: { code: string }) {
 export function CountrySwitcher({ className }: { className?: string }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { showToast } = useAppStore();
+  const showToast = useAppStore((s) => s.showToast);
   return (
     <div className={className ?? "px-4 pt-4 flex items-center gap-2 overflow-x-auto scrollbar-hide"}>
       <button

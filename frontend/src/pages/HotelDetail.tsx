@@ -32,7 +32,7 @@ export default function HotelDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user } = useAppStore();
+  const user = useAppStore((s) => s.user);
   const hotel = id ? HOTELS_BY_ID.get(id) : undefined;
 
   const [checkIn, setCheckIn] = useState(todayISO());
@@ -110,7 +110,7 @@ export default function HotelDetail() {
         <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
           <div className="flex mb-2">
             {Array.from({ length: hotel.stars }, (_, i) => (
-              <Star key={i} className="w-3.5 h-3.5 text-indigo-300 fill-indigo-300" />
+              <Star key={i} className="w-3.5 h-3.5 text-gold-300 fill-gold-300" />
             ))}
           </div>
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white drop-shadow-md leading-tight">
@@ -121,7 +121,7 @@ export default function HotelDetail() {
               <MapPin className="w-3.5 h-3.5" /> {hotel.city}
             </span>
             <span className="flex items-center gap-1">
-              <Star className="w-3.5 h-3.5 text-indigo-300 fill-indigo-300" /> {hotel.rating}
+              <Star className="w-3.5 h-3.5 text-gold-300 fill-gold-300" /> {hotel.rating}
             </span>
             <span
               className={cn(

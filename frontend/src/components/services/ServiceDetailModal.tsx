@@ -82,7 +82,7 @@ export function ServiceDetailModal({
                           <MapPin className="w-3 h-3" /> {city}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Star className="w-3 h-3 text-indigo-300 fill-indigo-300" /> {rating}
+                          <Star className="w-3 h-3 text-gold-300 fill-gold-300" /> {rating}
                         </span>
                       </Dialog.Description>
                     </div>

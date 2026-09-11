@@ -28,6 +28,7 @@ export function BottomNav() {
 
   return (
     <nav
+      aria-label={t("nav", "primary")}
       className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--nav-bg)] border-t border-[var(--border)] glass"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
@@ -44,6 +45,10 @@ export function BottomNav() {
             <button
               key={route}
               onClick={() => navigate(route)}
+              // The active tab is signalled only by colour + a filled chip.
+              // aria-current is what makes that state exist for a screen
+              // reader; without it the bar announces five identical buttons.
+              aria-current={active ? "page" : undefined}
               className={cn(
                 "relative flex flex-col items-center justify-center flex-1 h-full gap-0.5",
                 "transition-all duration-200 active:scale-90",

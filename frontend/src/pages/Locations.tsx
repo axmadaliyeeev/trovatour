@@ -1,26 +1,19 @@
 ﻿import { LocationCard } from '@/components/locations/LocationCard';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { CATEGORY_STYLE, type CategoryFilterKey } from '@/lib/categories';
 import { LOCATIONS } from '@/data';
 import { useTranslation } from '@/i18n';
 import { staggerContainer, staggerItem } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 import type { Location } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Church,
-  Landmark,
-  Leaf,
-  Map as MapIcon,
-  Palette,
-  Pickaxe,
-  Search,
-  SlidersHorizontal,
-  X,
-} from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-type CategoryFilter = Location['category'] | 'all';
+// Re-exported shape from the shared category module, so the filter row,
+// the cards it filters and any future surface all key off one definition.
+type CategoryFilter = CategoryFilterKey;
 
 const CITIES = ['Barchasi', ...Array.from(new Set(LOCATIONS.map(l => l.city))).sort()];
 const CATEGORY_FILTERS: CategoryFilter[] = [
@@ -36,20 +29,6 @@ function isCategoryFilter(value: string | null): value is CategoryFilter {
   return !!value && CATEGORY_FILTERS.includes(value as CategoryFilter);
 }
 
-const CATEGORY_ACCENTS: Record<CategoryFilter, { icon: string; chip: string }> = {
-  all: { icon: 'text-indigo-500', chip: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-600' },
-  tarix: { icon: 'text-indigo-600', chip: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-600' },
-  tabiat: {
-    icon: 'text-emerald-600',
-    chip: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600',
-  },
-  madaniyat: {
-    icon: 'text-fuchsia-600',
-    chip: 'bg-fuchsia-500/10 border-fuchsia-500/20 text-fuchsia-600',
-  },
-  din: { icon: 'text-amber-600', chip: 'bg-amber-500/10 border-amber-500/20 text-amber-600' },
-  arxeologiya: { icon: 'text-teal-600', chip: 'bg-teal-500/10 border-teal-500/20 text-teal-600' },
-};
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -89,14 +68,13 @@ export default function Locations() {
 
   // Same monoline icon family as Home/LocationCard's category badges — one
   // consistent set app-wide instead of per-screen emoji.
-  const CATEGORIES: { key: CategoryFilter; label: string; Icon: typeof MapIcon }[] = [
-    { key: 'all', label: t('locations', 'filter_all'), Icon: MapIcon },
-    { key: 'tarix', label: t('home', 'cat_tarix'), Icon: Landmark },
-    { key: 'tabiat', label: t('home', 'cat_tabiat'), Icon: Leaf },
-    { key: 'madaniyat', label: t('home', 'cat_madaniyat'), Icon: Palette },
-    { key: 'din', label: t('home', 'cat_din'), Icon: Church },
-    { key: 'arxeologiya', label: t('home', 'cat_arxeologiya'), Icon: Pickaxe },
-  ];
+  // Labels come from i18n; icon and colour come from the shared category
+  // module, so this row can never disagree with the badge on a card again.
+  const CATEGORIES = CATEGORY_FILTERS.map((key) => ({
+    key,
+    label: key === 'all' ? t('locations', 'filter_all') : t('home', CATEGORY_STYLE[key].tKey as 'cat_tarix'),
+    Icon: CATEGORY_STYLE[key].Icon,
+  }));
 
   const SORT_OPTIONS = [
     { key: 'rating', label: t('locations', 'sort_rating') },
@@ -222,7 +200,7 @@ export default function Locations() {
       <div className="flex gap-2 overflow-x-auto px-4 pb-1 mb-2 scrollbar-hide">
         {CATEGORIES.map(cat => {
           const active = activeCategory === cat.key;
-          const accent = CATEGORY_ACCENTS[cat.key];
+          const accent = CATEGORY_STYLE[cat.key];
           return (
             <button
               key={cat.key}
@@ -233,7 +211,8 @@ export default function Locations() {
                   ? 'border-indigo-500 text-white shadow-md shadow-indigo-500/20'
                   : cn(
                       'border-transparent bg-[var(--card)] hover:border-indigo-500/30',
-                      accent.chip
+                      accent.surface,
+                      accent.text
                     )
               )}
             >

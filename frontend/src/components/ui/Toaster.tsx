@@ -5,7 +5,12 @@ import { useAppStore } from "@/store";
 import type { Toast } from "@/store";
 
 export function Toaster() {
-  const { toasts, dismissToast } = useAppStore();
+  // Selectors, not a whole-store destructure — the Toaster is mounted for
+  // the entire session, so subscribing it to every slice meant a plan
+  // change or a theme toggle re-rendered it (and re-ran its
+  // AnimatePresence diff) for no reason.
+  const toasts       = useAppStore((s) => s.toasts);
+  const dismissToast = useAppStore((s) => s.dismissToast);
 
   return (
     <div

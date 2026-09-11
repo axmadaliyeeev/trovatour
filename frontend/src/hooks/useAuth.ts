@@ -18,16 +18,21 @@ interface UseAuthReturn {
 }
 
 export function useAuth(): UseAuthReturn {
-  const {
-    user,
-    isLoggedIn,
-    login,
-    logout,
-    updateUser,
-    authModalOpen,
-    openAuthModal,
-    closeAuthModal,
-  } = useAppStore();
+  // Field-by-field selectors, not `useAppStore()`. Destructuring the whole
+  // store subscribes the component to EVERY slice of it — so MainLayout,
+  // which calls this hook purely for `checkAuth`, re-rendered the entire
+  // app shell (sidebar, header, nav, the routed page) on every toast that
+  // appeared or expired, every plan add/remove and every keystroke that
+  // touched store state. The actions below are stable references created
+  // once by zustand, so selecting them costs nothing.
+  const user           = useAppStore((s) => s.user);
+  const isLoggedIn     = useAppStore((s) => s.isLoggedIn);
+  const login          = useAppStore((s) => s.login);
+  const logout         = useAppStore((s) => s.logout);
+  const updateUser     = useAppStore((s) => s.updateUser);
+  const authModalOpen  = useAppStore((s) => s.authModalOpen);
+  const openAuthModal  = useAppStore((s) => s.openAuthModal);
+  const closeAuthModal = useAppStore((s) => s.closeAuthModal);
 
   const checkAuth = useCallback(async () => {
     const token = localStorage.getItem("trova-token");

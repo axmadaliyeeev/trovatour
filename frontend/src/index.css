@@ -568,16 +568,6 @@ button, a, [role="button"], input, select, textarea, label {
 /* ── Images ─────────────────────────────────────────── */
 img { display: block; max-width: 100%; }
 
-/* ── Reduced motion ─────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration:       0.01ms !important;
-    animation-iteration-count: 1     !important;
-    transition-duration:      0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
 /* ── Generate button ──────────────────────────────────
    CSS for components/ui/GenerateButton.tsx. It lives here rather than in
    the component because the source this was adapted from used Next.js's
@@ -631,10 +621,12 @@ img { display: block; max-width: 100%; }
 }
 
 /* ── Reduced motion ───────────────────────────────────
-   Only two of this file's animations previously honoured the OS
-   "reduce motion" setting, and framer-motion's transitions honoured
-   none of them. For users who set this because motion triggers nausea
-   or vestibular symptoms, a partial opt-out is not an opt-out.
+   This block covers everything CSS drives. It cannot reach
+   framer-motion, which animates from JS as inline styles and ignores
+   CSS !important overrides entirely — App.tsx wraps the tree in
+   <MotionConfig reducedMotion="user"> for that half. Both are needed:
+   for someone who set this because motion triggers nausea or
+   vestibular symptoms, a partial opt-out is not an opt-out.
 
    Motion is collapsed rather than removed: 0.01ms still fires
    transitionend/animationend, so any JS waiting on those events keeps

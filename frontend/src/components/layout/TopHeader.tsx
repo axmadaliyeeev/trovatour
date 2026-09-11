@@ -16,7 +16,10 @@ const PAGE_LABEL: Record<string, [string, string]> = {
   "/saved":      ["nav", "saved"],
   "/uzbekistan": ["nav", "about"],
   "/services":   ["nav", "services"],
-  "/chat":       ["nav", "ai"],
+  // "AI" alone is the abbreviated label the narrow tab bar needs; the
+  // desktop header has room for the product's actual name, which is also
+  // what the sidebar entry and the chat's own header both say.
+  "/chat":       ["chat", "title"],
   "/profile":    ["nav", "profile"],
 };
 
@@ -24,9 +27,16 @@ export function TopHeader() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { isDesktop } = useBreakpoint();
-  const { user, plan, theme, toggleTheme, openAuthModal, setSearchOpen } = useAppStore();
+  const user          = useAppStore((s) => s.user);
+  // Only the COUNT is rendered, so select the number rather than the array:
+  // adding and removing the same place used to hand back a new array
+  // identity and re-render the header even though the badge never changed.
+  const planCount     = useAppStore((s) => s.plan.length);
+  const theme         = useAppStore((s) => s.theme);
+  const toggleTheme   = useAppStore((s) => s.toggleTheme);
+  const openAuthModal = useAppStore((s) => s.openAuthModal);
+  const setSearchOpen = useAppStore((s) => s.setSearchOpen);
   const { t } = useTranslation();
-  const planCount = plan.length;
   const pageLabelKey = PAGE_LABEL[pathname];
 
   return (

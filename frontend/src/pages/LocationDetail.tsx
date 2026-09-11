@@ -34,7 +34,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
             className={cn(
               "w-7 h-7 transition-colors",
               star <= (hovered || value)
-                ? "fill-indigo-500 text-indigo-500"
+                ? "fill-gold-500 text-gold-500"
                 : "fill-transparent text-[var(--border)]"
             )}
           />
@@ -148,7 +148,7 @@ function SmartReview({
             <p className="text-xs font-bold text-indigo-400">{t("detail", "smart_review_label")}</p>
             <p className="flex items-center gap-1 text-[10px] text-[var(--muted-foreground)]">
               {reviews.length} {t("detail", "total_reviews")} ·
-              <Star className="w-2.5 h-2.5 text-indigo-500 fill-indigo-500" />
+              <Star className="w-2.5 h-2.5 text-gold-500 fill-gold-500" />
               {avgRating.toFixed(1)}
             </p>
           </div>
@@ -224,7 +224,15 @@ function adaptBackendReview(r: BackendReview): Review {
 export default function LocationDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToPlan, removeFromPlan, isInPlan, showToast, user } = useAppStore();
+  const addToPlan      = useAppStore((s) => s.addToPlan);
+  const removeFromPlan = useAppStore((s) => s.removeFromPlan);
+  const showToast      = useAppStore((s) => s.showToast);
+  const user           = useAppStore((s) => s.user);
+  // The store's isInPlan() reads through get(), so it subscribes to
+  // nothing — it only looked reactive because the whole-store destructure
+  // above re-rendered this page on every store write. Selecting the
+  // boolean makes the saved state genuinely reactive.
+  const planIds        = useAppStore((s) => s.plan);
   const { t, lang } = useTranslation();
 
   const location = id ? LOCATIONS_BY_ID.get(id) : undefined;
@@ -298,7 +306,7 @@ export default function LocationDetail() {
   }
 
   const loc = location; // non-null; guard above guarantees this
-  const inPlan = isInPlan(loc.id);
+  const inPlan = planIds.some((l) => l.id === loc.id);
   function togglePlan() {
     if (inPlan) {
       removeFromPlan(loc.id);

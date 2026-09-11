@@ -167,7 +167,7 @@ function HotelsTab({ search, onSelect }: { search: string; onSelect: (h: HotelTy
               <h3 className="font-bold text-sm text-white drop-shadow-md">{h.name}</h3>
               <div className="flex mt-0.5">
                 {Array.from({ length: h.stars }, (_, i) => (
-                  <Star key={i} className="w-3 h-3 text-indigo-600 fill-indigo-600" />
+                  <Star key={i} className="w-3 h-3 text-gold-500 fill-gold-500" />
                 ))}
               </div>
             </div>

@@ -98,13 +98,26 @@ export default function Landing() {
     <div className="app-bg min-h-dvh overflow-x-hidden">
       {/* ── Header ─────────────────────────────────────────────── */}
       <header className="absolute top-0 inset-x-0 z-20 flex items-center justify-between px-5 sm:px-8 py-5">
-        <div>
-          <img src="/img/logo-l.svg" alt="trova" className="h-7 w-auto dark:hidden" />
-          <img src="/img/logo-d.svg" alt="trova" className="h-7 w-auto hidden dark:block" />
+        {/* A scrim, because this header floats over a PHOTOGRAPH, and the
+            top of that photograph is a pale dawn sky. Both the wordmark
+            and the "Sign In" button are white-on-transparent, so without
+            it their legibility depends entirely on which hero image
+            happens to be showing. A short top-down fade costs nothing
+            visually and guarantees the contrast. */}
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/45 to-transparent pointer-events-none" />
+        <div className="relative">
+          {/* Always the light-ink wordmark — not the theme-switched pair
+              used everywhere else. Every other placement sits on the app
+              canvas, where the app's theme IS the background; here the
+              background is the hero photo, so in light mode the dark-ink
+              variant was being painted onto a dark image, and in dark
+              mode the light one onto a bright sky. What is behind it
+              decides, and what is behind it is always a photo. */}
+          <img src="/img/logo-d.svg" alt="trova" className="h-7 w-auto" />
         </div>
         <button
           onClick={isLoggedIn ? enterApp : () => navigate("/login")}
-          className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm transition-colors"
+          className="relative px-4 py-2 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm transition-colors"
         >
           {isLoggedIn ? t("landing", "open_app") : t("landing", "sign_in")}
         </button>

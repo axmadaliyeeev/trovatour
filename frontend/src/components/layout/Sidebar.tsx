@@ -24,7 +24,12 @@ const NAV_TABS = [
 export function Sidebar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { user, plan, openAuthModal } = useAppStore();
+  const user          = useAppStore((s) => s.user);
+  // The badge renders a count, so subscribe to the count — selecting the
+  // whole `plan` array re-rendered the entire rail on any plan mutation
+  // (and a whole-store destructure re-rendered it on every toast too).
+  const planCount     = useAppStore((s) => s.plan.length);
+  const openAuthModal = useAppStore((s) => s.openAuthModal);
   const { t } = useTranslation();
 
   return (
@@ -32,7 +37,7 @@ export function Sidebar() {
     // full height of the screen next to a dense icon+label nav column is
     // exactly the CMS/admin-dashboard silhouette; a soft edge reads as a
     // floating panel instead.
-    <aside className="glass fixed left-0 top-0 h-screen w-60 z-40 flex flex-col bg-[var(--sidebar-bg)] shadow-[1px_0_0_0_var(--sidebar-border)] overflow-hidden">
+    <aside aria-label="trova" className="glass fixed left-0 top-0 h-screen w-60 z-40 flex flex-col bg-[var(--sidebar-bg)] shadow-[1px_0_0_0_var(--sidebar-border)] overflow-hidden">
 
       {/* ── Subtle top gradient glow ───────────────────── */}
       <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-indigo-500/6 to-transparent pointer-events-none" />
@@ -49,7 +54,7 @@ export function Sidebar() {
       </div>
 
       {/* ── Main navigation ────────────────────────────── */}
-      <nav className="flex-1 px-3.5 py-5 flex flex-col gap-1.5 overflow-y-auto">
+      <nav aria-label={t("nav", "primary")} className="flex-1 px-3.5 py-5 flex flex-col gap-1.5 overflow-y-auto">
 
         {NAV_TABS.map(({ route, Icon, key }) => {
           const active = pathname === route || (route !== "/home" && pathname.startsWith(route));
@@ -60,6 +65,11 @@ export function Sidebar() {
               // the tour actually references get one.
               id={TOUR_ANCHOR[route]}
               onClick={() => navigate(route)}
+              // Colour and weight are the ONLY signal of the current page
+              // here, which a screen reader cannot see at all. aria-current
+              // is what actually announces "current page" — without it the
+              // rail reads as five interchangeable buttons.
+              aria-current={active ? "page" : undefined}
               className={cn(
                 "relative w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl transition-all duration-200 group active:scale-[0.98]",
                 active
@@ -83,12 +93,12 @@ export function Sidebar() {
               </span>
 
               {/* Plan count badge — belongs on Saved Places now, not Locations */}
-              {route === "/saved" && plan.length > 0 && (
+              {route === "/saved" && planCount > 0 && (
                 <span className={cn(
                   "ml-auto min-w-[19px] h-[19px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center",
                   active ? "bg-white/25 text-white" : "bg-indigo-500/15 text-indigo-500"
                 )}>
-                  {plan.length}
+                  {planCount}
                 </span>
               )}
             </button>
@@ -104,6 +114,7 @@ export function Sidebar() {
               <button
                 id={TOUR_IDS.AI}
                 onClick={() => navigate(route)}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl transition-all duration-200 relative active:scale-[0.98]",
                   active
@@ -128,7 +139,7 @@ export function Sidebar() {
                     "text-[10px] font-medium",
                     active ? "text-white/70" : "text-[var(--muted-foreground)]"
                   )}>
-                    Sayohat yordamchisi
+                    {t("nav", "ai_subtitle")}
                   </p>
                 </div>
                 <span className={cn(
@@ -159,6 +170,7 @@ export function Sidebar() {
           {user ? (
             <button
               onClick={() => navigate("/profile")}
+              aria-current={pathname === "/profile" ? "page" : undefined}
               className={cn(
                 "w-full flex items-center gap-3 p-2.5 rounded-xl transition-all group active:scale-[0.98]",
                 pathname === "/profile"

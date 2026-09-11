@@ -61,7 +61,7 @@ export default function RestaurantDetail() {
               <MapPin className="w-3.5 h-3.5" /> {restaurant.city}
             </span>
             <span className="flex items-center gap-1">
-              <Star className="w-3.5 h-3.5 text-indigo-300 fill-indigo-300" /> {restaurant.rating}
+              <Star className="w-3.5 h-3.5 text-gold-300 fill-gold-300" /> {restaurant.rating}
             </span>
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" /> {restaurant.hours}

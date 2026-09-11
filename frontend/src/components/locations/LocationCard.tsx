@@ -1,3 +1,4 @@
+import { CATEGORY_STYLE } from '@/lib/categories';
 import { useSpotlight } from '@/hooks/useSpotlight';
 import { useTranslation } from '@/i18n';
 import { syncAddToPlan, syncRemoveFromPlan } from '@/lib/plan-sync';
@@ -5,65 +6,10 @@ import { cn, truncate } from '@/lib/utils';
 import { useAppStore } from '@/store';
 import type { Location } from '@/types';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Bookmark,
-  BookmarkCheck,
-  Church,
-  Clock,
-  Landmark,
-  Leaf,
-  MapPin,
-  Navigation,
-  Palette,
-  Pickaxe,
-  Star,
-} from 'lucide-react';
+import { Bookmark, BookmarkCheck, Clock, MapPin, Navigation, Star } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Single monoline icon set (constant 2px stroke, no filled illustrative
-// icons) — every category reads as one geometric family, on-brand emerald,
-// instead of a mix of flat-color emoji and unrelated hues.
-const CAT_STYLE: Record<
-  Location['category'],
-  {
-    Icon: typeof Landmark;
-    color: string;
-    bg: string;
-    tKey: 'cat_tarix' | 'cat_tabiat' | 'cat_madaniyat' | 'cat_din' | 'cat_arxeologiya';
-  }
-> = {
-  tarix: {
-    Icon: Landmark,
-    color: 'text-indigo-600',
-    bg: 'bg-indigo-500/15 border-indigo-500/25',
-    tKey: 'cat_tarix',
-  },
-  tabiat: {
-    Icon: Leaf,
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-500/15 border-emerald-500/25',
-    tKey: 'cat_tabiat',
-  },
-  madaniyat: {
-    Icon: Palette,
-    color: 'text-fuchsia-600',
-    bg: 'bg-fuchsia-500/15 border-fuchsia-500/25',
-    tKey: 'cat_madaniyat',
-  },
-  din: {
-    Icon: Church,
-    color: 'text-amber-600',
-    bg: 'bg-amber-500/15 border-amber-500/25',
-    tKey: 'cat_din',
-  },
-  arxeologiya: {
-    Icon: Pickaxe,
-    color: 'text-teal-600',
-    bg: 'bg-teal-500/15 border-teal-500/25',
-    tKey: 'cat_arxeologiya',
-  },
-};
 
 interface LocationCardProps {
   location: Location;
@@ -74,10 +20,27 @@ interface LocationCardProps {
 function LocationCardImpl({ location, variant = 'default', className }: LocationCardProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { addToPlan, removeFromPlan, isInPlan, showToast } = useAppStore();
-  const inPlan = isInPlan(location.id);
-  const cat = CAT_STYLE[location.category];
-  const catLabel = t('home', cat.tKey);
+  // Selectors, not a whole-store destructure. The memo() at the bottom of
+  // this file was doing nothing: `useAppStore()` subscribes the component
+  // to EVERY slice, so a toast appearing, a theme toggle or any unrelated
+  // store write re-rendered all 40+ cards in the grid regardless of their
+  // props being identical. Actions are stable references, so selecting
+  // them individually costs nothing.
+  const addToPlan      = useAppStore((s) => s.addToPlan);
+  const removeFromPlan = useAppStore((s) => s.removeFromPlan);
+  const showToast      = useAppStore((s) => s.showToast);
+  // Derived to a BOOLEAN rather than calling the store's isInPlan(): that
+  // helper reads through get(), so it returns a fresh value but subscribes
+  // to nothing — it only appeared reactive because the whole-store
+  // destructure above re-rendered on everything. Selecting the boolean
+  // means this card re-renders when ITS OWN saved state flips, and not
+  // when a different card's does.
+  const inPlan = useAppStore((s) => s.plan.some((l) => l.id === location.id));
+  // Icon + colour pair comes from lib/categories.ts — the same record the
+  // Locations filter row reads, so a chip and the badges it filters to can
+  // no longer be different colours for the same category.
+  const cat = CATEGORY_STYLE[location.category];
+  const catLabel = t('home', cat.tKey as 'cat_tarix');
   const freeLabel = t('detail', 'free');
 
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -139,8 +102,7 @@ function LocationCardImpl({ location, variant = 'default', className }: Location
         <span
           className={cn(
             'absolute top-3 left-3 flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full border backdrop-blur-md',
-            cat.bg,
-            cat.color
+            cat.onImage
           )}
         >
           <cat.Icon className="w-3 h-3" strokeWidth={2} /> {catLabel}
@@ -199,7 +161,11 @@ function LocationCardImpl({ location, variant = 'default', className }: Location
               {location.city}
             </span>
             <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-full">
-              <Star className="w-3 h-3 text-indigo-600 fill-indigo-600" />
+              {/* Teal, not the emerald primary: ratings and premium marks
+                  are the secondary accent's job across the app (see the
+                  --gold token), and emerald-600 is a dark green that all
+                  but disappeared against a photograph at 12px. */}
+              <Star className="w-3 h-3 text-gold-300 fill-gold-300" />
               <span className="text-white text-xs font-bold">{location.rating}</span>
             </div>
           </div>
@@ -254,8 +220,7 @@ function LocationCardImpl({ location, variant = 'default', className }: Location
         <span
           className={cn(
             'absolute top-2.5 left-2.5 flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full border backdrop-blur-md',
-            cat.bg,
-            cat.color
+            cat.onImage
           )}
         >
           <cat.Icon className="w-3 h-3" strokeWidth={2} /> {catLabel}
@@ -317,7 +282,7 @@ function LocationCardImpl({ location, variant = 'default', className }: Location
             {location.city}
           </span>
           <span className="flex items-center gap-1 shrink-0 text-[11px] text-[var(--muted-foreground)] tabular-nums">
-            <Star className="w-3 h-3 text-indigo-500 fill-indigo-500" />
+            <Star className="w-3 h-3 text-gold-500 fill-gold-500" />
             <span className="font-semibold text-[var(--foreground)]">{location.rating}</span>(
             {location.reviewCount >= 1000
               ? `${(location.reviewCount / 1000).toFixed(1)}k`

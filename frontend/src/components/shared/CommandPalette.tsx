@@ -30,7 +30,14 @@ interface Action {
 export function CommandPalette() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { searchOpen, setSearchOpen, theme, toggleTheme, showToast } = useAppStore();
+  // The palette is mounted app-wide for the entire session; a whole-store
+  // destructure re-rendered it (and re-ran its result filtering) on every
+  // toast, plan change and route-driven store write, even while closed.
+  const searchOpen    = useAppStore((s) => s.searchOpen);
+  const setSearchOpen = useAppStore((s) => s.setSearchOpen);
+  const theme         = useAppStore((s) => s.theme);
+  const toggleTheme   = useAppStore((s) => s.toggleTheme);
+  const showToast     = useAppStore((s) => s.showToast);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -228,7 +235,7 @@ export function CommandPalette() {
                     <span className="flex items-center gap-1 text-[11px] text-[var(--muted-foreground)]">
                       <MapPin className="w-3 h-3 text-indigo-500/70" />
                       {loc.city}
-                      <Star className="w-3 h-3 text-indigo-600 fill-indigo-600 ml-1.5" />
+                      <Star className="w-3 h-3 text-gold-500 fill-gold-500 ml-1.5" />
                       {loc.rating}
                     </span>
                   </span>
